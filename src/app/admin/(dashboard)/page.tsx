@@ -10,6 +10,7 @@ import {
   PlusCircle
 } from "lucide-react";
 import { DashboardStats } from "@/components/admin/DashboardStats";
+import Link from "next/link";
 
 const quickActions = [
   { label: "New Blog Post", href: "/admin/blog", icon: PlusCircle },
