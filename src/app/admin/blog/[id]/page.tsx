@@ -1,10 +1,11 @@
 import React from "react";
 import { BlogEditor } from "@/components/admin/modules/BlogEditor";
 
-export default function AdminBlogEditPage({ params }: { params: { id: string } }) {
+export default async function AdminBlogEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div>
-      <BlogEditor id={params.id} />
+      <BlogEditor id={id} />
     </div>
   );
 }

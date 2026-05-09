@@ -3,10 +3,10 @@ import { getPageContent } from "@/lib/db/content";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { page: string } }
+  { params }: { params: Promise<{ page: string }> }
 ) {
   try {
-    const page = params.page;
+    const { page } = await params;
     const content = await getPageContent(page);
     return NextResponse.json(content);
   } catch (error) {
