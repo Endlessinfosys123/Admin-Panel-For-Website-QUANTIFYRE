@@ -72,6 +72,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
   const path = slug.join("/");
   
   try {
+    // Handle Media Upload separately (it uses FormData)
+    if (path === "media/upload") {
+      const formData = await req.formData();
+      const file = formData.get("file") as File;
+      if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const url = await uploadFile(file, fileName);
+      return NextResponse.json({ url });
+    }
+
     const data = await req.json();
 
     switch (path) {
