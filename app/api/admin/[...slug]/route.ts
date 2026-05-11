@@ -4,15 +4,15 @@ import { authOptions } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listFiles, uploadFile, deleteFile } from "@/lib/db/storage";
 import { getAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from "@/lib/db/users";
-import { saveSettings } from "@/lib/db/settings";
-import { saveNavigation, reorderNavigation } from "@/lib/db/navigation";
-import { saveSection, reorderSections, deleteSection } from "@/lib/db/sections";
-import { saveBlogPost, deleteBlogPost } from "@/lib/db/blog";
-import { saveProject, deleteProject } from "@/lib/db/projects";
-import { saveService, deleteService, reorderServices } from "@/lib/db/services";
-import { saveTestimonial, deleteTestimonial, reorderTestimonials } from "@/lib/db/testimonials";
-import { saveFAQ, deleteFAQ, reorderFAQs } from "@/lib/db/faq";
-import { saveStat, deleteStat, reorderStats } from "@/lib/db/stats";
+import { updateSiteSettings } from "@/lib/db/settings";
+import { createNavigationLink, updateNavigationLink, updateNavigationOrder, deleteNavigationLink } from "@/lib/db/navigation";
+import { createSection, updateSection, updateSectionsOrder, deleteSection } from "@/lib/db/sections";
+import { createBlogPost, updateBlogPost, deleteBlogPost } from "@/lib/db/blog";
+import { createProject, updateProject, deleteProject } from "@/lib/db/projects";
+import { createService, updateService, updateServicesOrder, deleteService } from "@/lib/db/services";
+import { createTestimonial, updateTestimonial, updateTestimonialsOrder, deleteTestimonial } from "@/lib/db/testimonials";
+import { createFAQ, updateFAQ, updateFAQsOrder, deleteFAQ } from "@/lib/db/faq";
+import { createStat, updateStat, updateStatsOrder, deleteStat } from "@/lib/db/stats";
 
 export const dynamic = 'force-dynamic';
 
@@ -92,63 +92,63 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
         return NextResponse.json(userResult);
 
       case "settings/save":
-        const settingsResult = await saveSettings(data);
+        const settingsResult = await updateSiteSettings(data);
         return NextResponse.json(settingsResult);
 
       case "navigation/save":
-        const navResult = await saveNavigation(data);
+        const navResult = data.id ? await updateNavigationLink(data.id, data) : await createNavigationLink(data);
         return NextResponse.json(navResult);
 
       case "navigation/reorder":
-        await reorderNavigation(data.items);
+        await updateNavigationOrder(data.items);
         return NextResponse.json({ success: true });
 
       case "sections/save":
-        const sectionResult = await saveSection(data);
+        const sectionResult = data.id ? await updateSection(data.id, data) : await createSection(data);
         return NextResponse.json(sectionResult);
 
       case "sections/reorder":
-        await reorderSections(data.page, data.items);
+        await updateSectionsOrder(data.items);
         return NextResponse.json({ success: true });
 
       case "blog/save":
-        const blogResult = await saveBlogPost(data);
+        const blogResult = data.id ? await updateBlogPost(data.id, data) : await createBlogPost(data);
         return NextResponse.json(blogResult);
 
       case "portfolio/save":
-        const projectResult = await saveProject(data);
+        const projectResult = data.id ? await updateProject(data.id, data) : await createProject(data);
         return NextResponse.json(projectResult);
 
       case "services/save":
-        const serviceResult = await saveService(data);
+        const serviceResult = data.id ? await updateService(data.id, data) : await createService(data);
         return NextResponse.json(serviceResult);
 
       case "services/reorder":
-        await reorderServices(data.items);
+        await updateServicesOrder(data.items);
         return NextResponse.json({ success: true });
 
       case "testimonials/save":
-        const testimonialResult = await saveTestimonial(data);
+        const testimonialResult = data.id ? await updateTestimonial(data.id, data) : await createTestimonial(data);
         return NextResponse.json(testimonialResult);
 
       case "testimonials/reorder":
-        await reorderTestimonials(data.items);
+        await updateTestimonialsOrder(data.items);
         return NextResponse.json({ success: true });
 
       case "faq/save":
-        const faqResult = await saveFAQ(data);
+        const faqResult = data.id ? await updateFAQ(data.id, data) : await createFAQ(data);
         return NextResponse.json(faqResult);
 
       case "faq/reorder":
-        await reorderFAQs(data.items);
+        await updateFAQsOrder(data.items);
         return NextResponse.json({ success: true });
 
       case "stats/save":
-        const statResult = await saveStat(data);
+        const statResult = data.id ? await updateStat(data.id, data) : await createStat(data);
         return NextResponse.json(statResult);
 
       case "stats/reorder":
-        await reorderStats(data.items);
+        await updateStatsOrder(data.items);
         return NextResponse.json({ success: true });
 
       default:
@@ -180,6 +180,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ s
         if (session.user?.role !== "super_admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         if (id === session.user?.id) return NextResponse.json({ error: "Cannot delete self" }, { status: 400 });
         await deleteAdminUser(id);
+        return NextResponse.json({ success: true });
+
+      case "navigation/delete":
+        await deleteNavigationLink(id);
         return NextResponse.json({ success: true });
 
       case "sections/delete":

@@ -8,18 +8,20 @@ import { getFAQs } from "@/lib/db/faq";
 import { getStats } from "@/lib/db/stats";
 import { getNavigation } from "@/lib/db/navigation";
 import { getSiteSettings } from "@/lib/db/settings";
-import { getSections } from "@/lib/db/sections";
+import { getPageSections } from "@/lib/db/sections";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   const path = slug.join("/");
+  const { searchParams } = new URL(req.url);
 
   try {
     switch (path) {
       case "navigation":
-        const nav = await getNavigation();
+        const type = (searchParams.get("type") as "header" | "footer") || "header";
+        const nav = await getNavigation(type);
         return NextResponse.json(nav);
       
       case "settings":
@@ -51,8 +53,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         return NextResponse.json(stats);
 
       case "sections":
-        const pageParam = new URL(req.url).searchParams.get("page");
-        const sections = await getSections(pageParam || "home");
+        const pageId = searchParams.get("page") || "home";
+        const sections = await getPageSections(pageId);
         return NextResponse.json(sections);
 
       default:
@@ -68,6 +70,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         return NextResponse.json(content);
     }
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to fetch content" }, { status: 500 });
   }
 }
